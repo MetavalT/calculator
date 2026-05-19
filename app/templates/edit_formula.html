@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Formula</title>
+</head>
+
+<body style="font-family:Arial;padding:40px;">
+
+    <h1>Edit Formula</h1>
+
+    <form method="POST">
+
+        <label>Name</label>
+        <br><br>
+
+        <input
+            type="text"
+            name="name"
+            value="{{ formula.name }}"
+            style="width:400px;padding:10px;"
+        >
+
+        <br><br>
+
+        <label>Description</label>
+        <br><br>
+
+        <textarea
+            name="description"
+            style="width:400px;height:100px;padding:10px;"
+        >{{ formula.description }}</textarea>
+
+        <br><br>
+
+        <label>Expression</label>
+        <br><br>
+
+        <input
+            type="text"
+            name="expression"
+            value="{{ formula.expression }}"
+            style="width:400px;padding:10px;"
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Update Formula
+        </button>
+        <br><br>
+
+<a href="/delete-formula/{{ formula.id }}">
+
+    <button
+        type="button"
+        onclick="return confirm('Are you sure?')"
+        style="
+            background:red;
+            color:white;
+            border:none;
+            padding:10px 20px;
+            cursor:pointer;
+        "
+    >
+        Delete Formula
+    </button>
+
+</a>
+
+    </form>
+
+</body>
+</html>

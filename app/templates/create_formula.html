@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Create Formula</h2>
+
+<form method="POST">
+
+    <div class="mb-3">
+        <label>Formula Name</label>
+        <input type="text" name="name" class="form-control">
+    </div>
+
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea name="description" class="form-control"></textarea>
+    </div>
+
+    <div class="mb-3">
+        <label>Expression</label>
+        <textarea name="expression" class="form-control"></textarea>
+    </div>
+
+    <hr>
+
+    <h4>Variables</h4>
+
+    <div id="variables-container">
+
+        <div class="row mb-3 variable-row">
+
+            <div class="col">
+                <input type="text" name="variable_name[]" placeholder="Variable Name" class="form-control">
+            </div>
+
+            <div class="col">
+                <input type="text" name="display_name[]" placeholder="Display Name" class="form-control">
+            </div>
+
+            <div class="col">
+                <input type="text" name="expected_unit[]" placeholder="Expected Unit" class="form-control">
+            </div>
+
+            <div class="col">
+                <input type="text" name="available_units[]" placeholder="GPM,LPM,m3/hr" class="form-control">
+            </div>
+
+            <div class="col">
+                <input type="text" name="variable_type[]" placeholder="flow_rate" class="form-control">
+            </div>
+
+        </div>
+
+    </div>
+
+    <button type="button" class="btn btn-secondary" onclick="addVariable()">
+        Add Variable
+    </button>
+
+    <button type="submit" class="btn btn-success">
+        Save Formula
+    </button>
+
+</form>
+
+{% endblock %}

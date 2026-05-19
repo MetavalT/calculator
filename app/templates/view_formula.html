@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ formula.name }}</title>
+</head>
+
+<body style="font-family:Arial;padding:40px;">
+
+    <h1>{{ formula.name }}</h1>
+
+    <p>{{ formula.description }}</p>
+
+    <h3>Formula:</h3>
+
+    <div style="
+        background:#f4f4f4;
+        padding:15px;
+        border-radius:10px;
+    ">
+        {{ formula.expression }}
+    </div>
+
+    <h3>Variables</h3>
+
+    <ul>
+        {% for var in variables %}
+
+        <li>
+            {{ var.display_name }}
+            ({{ var.variable_name }})
+        </li>
+
+        {% endfor %}
+    </ul>
+
+    <br>
+
+    <a href="/edit-formula/{{ formula.id }}">
+        <button>Edit Formula</button>
+    </a>
+
+    <a href="/calculate/{{ formula.id }}">
+        <button>Calculate</button>
+    </a>
+
+</body>
+</html>

@@ -1,0 +1,9 @@
+Flask
+Flask-SQLAlchemy
+psycopg2-binary
+sympy
+pandas
+openpyxl
+python-dotenv
+
+# pip install -r requirements.txt

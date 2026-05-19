@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Available Formulas</h2>
+
+<div class="row">
+
+{% for formula in formulas %}
+
+<div class="col-md-4 mb-3">
+
+    <div class="card p-3">
+
+        <a href="/formula/{{ formula.id }}">
+    {{ formula.name }}
+</a>
+
+        <p>{{ formula.description }}</p>
+
+        <a href="/calculate/{{ formula.id }}" class="btn btn-primary">
+            Calculate
+        </a>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<hr>
+
+<h2>Recent Calculations</h2>
+
+<table class="table table-bordered">
+
+<tr>
+    <th>ID</th>
+    <th>Formula</th>
+    <th>Values</th>
+    <th>Answer</th>
+</tr>
+
+{% for calc in calculations %}
+
+<tr>
+    <td>{{ calc.id }}</td>
+    <td>{{ calc.formula_name }}</td>
+    <td>{{ calc.values_used }}</td>
+    <td>{{ calc.answer }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}

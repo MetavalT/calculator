@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ formula.name }}</title>
+
+    <style>
+        body{
+            font-family: Arial;
+            padding:40px;
+        }
+
+        .box{
+            width:500px;
+            margin:auto;
+            border:1px solid #ccc;
+            padding:20px;
+            border-radius:10px;
+        }
+
+        input, select{
+            width:100%;
+            padding:10px;
+            margin-top:5px;
+            margin-bottom:15px;
+        }
+
+        button{
+            padding:10px 20px;
+            cursor:pointer;
+        }
+
+        .result{
+            margin-top:20px;
+            font-size:22px;
+            font-weight:bold;
+            color:green;
+        }
+
+        .formula-box{
+            background:#f4f4f4;
+            padding:10px;
+            margin-bottom:20px;
+            border-radius:5px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+
+    <h1>{{ formula.name }}</h1>
+
+    <p>{{ formula.description }}</p>
+
+    <div class="formula-box">
+        <strong>Formula:</strong>
+        {{ formula.expression }}
+    </div>
+
+    {% for var in variables %}
+
+        {% set units = var.available_units.split('|')[0].split(',') %}
+
+        <label>{{ var.display_name }}</label>
+
+        <input
+            type="number"
+            id="value_{{ var.variable_name }}"
+            placeholder="Enter {{ var.display_name }}"
+        >
+
+        <select id="unit_{{ var.variable_name }}">
+
+            {% for unit in units %}
+                <option value="{{ unit }}">{{ unit }}</option>
+            {% endfor %}
+
+        </select>
+
+    {% endfor %}
+
+    <button onclick="calculateFormula()">
+        Calculate
+    </button>
+
+    <div class="result" id="result">
+
+    </div>
+
+</div>
+
+<script>
+
+async function calculateFormula(){
+
+    let values = {}
+
+    {% for var in variables %}
+
+    values["{{ var.variable_name }}"] = {
+        value: document.getElementById(
+            "value_{{ var.variable_name }}"
+        ).value,
+
+        unit: document.getElementById(
+            "unit_{{ var.variable_name }}"
+        ).value
+    }
+
+    {% endfor %}
+
+    const response = await fetch('/api/calculate', {
+
+        method:'POST',
+
+        headers:{
+            'Content-Type':'application/json'
+        },
+
+        body: JSON.stringify({
+            formula_id: {{ formula.id }},
+            values: values
+        })
+    })
+
+    const data = await response.json()
+
+    document.getElementById('result').innerHTML =
+        "Answer = " + data.answer
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Calculation History</h2>
+
+<table class="table table-bordered">
+
+<tr>
+    <th>ID</th>
+    <th>Formula</th>
+    <th>Values</th>
+    <th>Answer</th>
+    <th>Created At</th>
+</tr>
+
+{% for calc in calculations %}
+
+<tr>
+    <td>{{ calc.id }}</td>
+    <td>{{ calc.formula_name }}</td>
+    <td>{{ calc.values_used }}</td>
+    <td>{{ calc.answer }}</td>
+    <td>{{ calc.created_at }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% endblock %}
