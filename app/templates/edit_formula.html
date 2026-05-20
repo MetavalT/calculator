@@ -1,73 +1,230 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Formula</title>
-</head>
+{% extends 'base.html' %}
 
-<body style="font-family:Arial;padding:40px;">
+{% block content %}
 
-    <h1>Edit Formula</h1>
+<h2>Edit Formula</h2>
 
-    <form method="POST">
+<form method="POST">
 
-        <label>Name</label>
-        <br><br>
+    <div class="mb-3">
+
+        <label>Formula Name</label>
 
         <input
             type="text"
             name="name"
             value="{{ formula.name }}"
-            style="width:400px;padding:10px;"
+            class="form-control"
         >
+    </div>
 
-        <br><br>
+    <div class="mb-3">
 
         <label>Description</label>
-        <br><br>
 
         <textarea
             name="description"
-            style="width:400px;height:100px;padding:10px;"
+            class="form-control"
         >{{ formula.description }}</textarea>
 
-        <br><br>
+    </div>
+
+    <div class="mb-3">
 
         <label>Expression</label>
-        <br><br>
 
-        <input
-            type="text"
+        <textarea
             name="expression"
-            value="{{ formula.expression }}"
-            style="width:400px;padding:10px;"
-        >
+            class="form-control"
+        >{{ formula.expression }}</textarea>
 
-        <br><br>
+    </div>
 
-        <button type="submit">
-            Update Formula
-        </button>
-        <br><br>
+    <hr>
 
-<a href="/delete-formula/{{ formula.id }}">
+    <h4>Variables</h4>
+
+    <div id="variables-container">
+
+        {% for var in variables %}
+
+        {% set unit_data = var.available_units.split('|') %}
+
+        <div class="row mb-3 variable-row">
+
+            <div class="col">
+                <input
+                    type="text"
+                    name="variable_name[]"
+                    value="{{ var.variable_name }}"
+                    class="form-control"
+                >
+            </div>
+
+            <div class="col">
+                <input
+                    type="text"
+                    name="display_name[]"
+                    value="{{ var.display_name }}"
+                    class="form-control"
+                >
+            </div>
+
+            <div class="col">
+                <input
+                    type="text"
+                    name="expected_unit[]"
+                    value="{{ var.expected_unit }}"
+                    class="form-control"
+                >
+            </div>
+
+            <div class="col">
+                <input
+                    type="text"
+                    name="available_units[]"
+                    value="{{ unit_data[0] }}"
+                    class="form-control"
+                >
+            </div>
+
+            <div class="col">
+                <input
+                    type="text"
+                    name="variable_type[]"
+                    value="{{ unit_data[1] }}"
+                    class="form-control"
+                >
+            </div>
+
+            <div class="col">
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="removeVariable(this)"
+                >
+                    X
+                </button>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
 
     <button
         type="button"
-        onclick="return confirm('Are you sure?')"
-        style="
-            background:red;
-            color:white;
-            border:none;
-            padding:10px 20px;
-            cursor:pointer;
-        "
+        class="btn btn-secondary mt-2"
+        onclick="addVariable()"
     >
-        Delete Formula
+        Add Variable
     </button>
 
-</a>
+    <button
+        type="submit"
+        class="btn btn-success mt-2"
+    >
+        Update Formula
+    </button>
 
-    </form>
+    <a href="/delete-formula/{{ formula.id }}">
 
-</body>
-</html>
+        <button
+            type="button"
+            class="btn btn-danger mt-2"
+            onclick="return confirm('Delete Formula?')"
+        >
+            Delete Formula
+        </button>
+
+    </a>
+
+</form>
+
+<script>
+
+function addVariable(){
+
+    let html = `
+
+    <div class="row mb-3 variable-row">
+
+        <div class="col">
+            <input
+                type="text"
+                name="variable_name[]"
+                placeholder="speed"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="display_name[]"
+                placeholder="Speed"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="expected_unit[]"
+                placeholder="km/hr"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="available_units[]"
+                placeholder="km/hr,m/s"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="variable_type[]"
+                placeholder="speed"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+
+            <button
+                type="button"
+                class="btn btn-danger"
+                onclick="removeVariable(this)"
+            >
+                X
+            </button>
+
+        </div>
+
+    </div>
+    `
+
+    document.getElementById(
+        'variables-container'
+    ).insertAdjacentHTML(
+        'beforeend',
+        html
+    )
+}
+
+function removeVariable(button){
+
+    button.closest('.variable-row').remove()
+}
+
+</script>
+
+{% endblock %}

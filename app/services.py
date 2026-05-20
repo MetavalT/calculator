@@ -1,44 +1,74 @@
-from sympy import symbols, sympify
 from app.utils import convert_to_expected
 
 
-def evaluate_formula(expression, variables, variable_config):
+def evaluate_formula(
+
+    expression,
+
+    variables,
+
+    variable_config
+
+):
 
     processed_values = {}
+
+    # =========================
+    # UNIT CONVERSION
+    # =========================
 
     for variable_name, value_data in variables.items():
 
         value = value_data['value']
+
         selected_unit = value_data['unit']
 
         config = variable_config[variable_name]
 
         expected_unit = config['expected_unit']
+
         variable_type = config['variable_type']
 
         converted_value = convert_to_expected(
+
             value,
+
             variable_type,
+
             selected_unit,
+
             expected_unit
+
         )
 
         processed_values[variable_name] = converted_value
 
-    # IMPORTANT FIX
-    # Q, S, N etc sympy reserved names hote hain
-    # isliye custom symbols force kar rahe
+    # =========================
+    # REPLACE VARIABLES
+    # =========================
 
-    symbol_map = {}
+    final_expression = expression
 
-    for key in processed_values.keys():
-        symbol_map[key] = symbols(key)
+    for variable, value in processed_values.items():
 
-    expr = sympify(
-        expression,
-        locals=symbol_map
-    )
+        final_expression = final_expression.replace(
+            variable,
+            str(value)
+        )
 
-    result = expr.evalf(subs=processed_values)
+    # =========================
+    # CALCULATE
+    # =========================
 
-    return round(float(result), 4)
+    result = eval(final_expression)
+
+    # =========================
+    # ROUNDING
+    # =========================
+
+    if result == int(result):
+        result = int(result)
+    else:
+        result = round(result, 4)
+
+    return result

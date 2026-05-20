@@ -8,17 +8,33 @@
 
     <div class="mb-3">
         <label>Formula Name</label>
-        <input type="text" name="name" class="form-control">
+
+        <input
+            type="text"
+            name="name"
+            class="form-control"
+            placeholder="Distance Calculator"
+        >
     </div>
 
     <div class="mb-3">
         <label>Description</label>
-        <textarea name="description" class="form-control"></textarea>
+
+        <textarea
+            name="description"
+            class="form-control"
+            placeholder="Calculate distance using speed and time"
+        ></textarea>
     </div>
 
     <div class="mb-3">
         <label>Expression</label>
-        <textarea name="expression" class="form-control"></textarea>
+
+        <textarea
+            name="expression"
+            class="form-control"
+            placeholder="speed * time"
+        ></textarea>
     </div>
 
     <hr>
@@ -30,37 +46,160 @@
         <div class="row mb-3 variable-row">
 
             <div class="col">
-                <input type="text" name="variable_name[]" placeholder="Variable Name" class="form-control">
+                <input
+                    type="text"
+                    name="variable_name[]"
+                    placeholder="speed"
+                    class="form-control"
+                >
             </div>
 
             <div class="col">
-                <input type="text" name="display_name[]" placeholder="Display Name" class="form-control">
+                <input
+                    type="text"
+                    name="display_name[]"
+                    placeholder="Speed"
+                    class="form-control"
+                >
             </div>
 
             <div class="col">
-                <input type="text" name="expected_unit[]" placeholder="Expected Unit" class="form-control">
+                <input
+                    type="text"
+                    name="expected_unit[]"
+                    placeholder="km/hr"
+                    class="form-control"
+                >
             </div>
 
             <div class="col">
-                <input type="text" name="available_units[]" placeholder="GPM,LPM,m3/hr" class="form-control">
+                <input
+                    type="text"
+                    name="available_units[]"
+                    placeholder="km/hr,m/s"
+                    class="form-control"
+                >
             </div>
 
             <div class="col">
-                <input type="text" name="variable_type[]" placeholder="flow_rate" class="form-control">
+                <input
+                    type="text"
+                    name="variable_type[]"
+                    placeholder="speed"
+                    class="form-control"
+                >
+            </div>
+
+            <div class="col">
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="removeVariable(this)"
+                >
+                    X
+                </button>
             </div>
 
         </div>
 
     </div>
 
-    <button type="button" class="btn btn-secondary" onclick="addVariable()">
+    <button
+        type="button"
+        class="btn btn-secondary mt-2"
+        onclick="addVariable()"
+    >
         Add Variable
     </button>
 
-    <button type="submit" class="btn btn-success">
+    <button
+        type="submit"
+        class="btn btn-success mt-2"
+    >
         Save Formula
     </button>
 
 </form>
+
+<script>
+
+function addVariable(){
+
+    let html = `
+
+    <div class="row mb-3 variable-row">
+
+        <div class="col">
+            <input
+                type="text"
+                name="variable_name[]"
+                placeholder="distance"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="display_name[]"
+                placeholder="Distance"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="expected_unit[]"
+                placeholder="km"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="available_units[]"
+                placeholder="km,m"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="variable_type[]"
+                placeholder="distance"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <button
+                type="button"
+                class="btn btn-danger"
+                onclick="removeVariable(this)"
+            >
+                X
+            </button>
+        </div>
+
+    </div>
+    `
+
+    document.getElementById(
+        'variables-container'
+    ).insertAdjacentHTML(
+        'beforeend',
+        html
+    )
+}
+
+function removeVariable(button){
+
+    button.closest('.variable-row').remove()
+}
+
+</script>
 
 {% endblock %}

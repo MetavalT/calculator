@@ -7,21 +7,48 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<nav class="navbar navbar-dark bg-dark p-3">
+<nav class="navbar navbar-dark bg-dark px-4 py-3">
+
     <div class="container-fluid">
 
-        <a class="navbar-brand" href="/">Engineering Calculator</a>
-
+        <!-- LEFT SIDE -->
         <div>
-            <a href="/" class="btn btn-light">Home</a>
-            <a href="/history" class="btn btn-light">History</a>
-            <a href="/create-formula" class="btn btn-warning">Create Formula</a>
-            <a href="/export-excel" class="btn btn-success">Excel Export</a>
+            <a href="/" class="btn btn-light fw-bold">
+                🏠 Home
+            </a>
+        </div>
+
+        <nav class="navbar navbar-dark bg-dark">
+
+    <div class="container-fluid d-flex justify-content-between">
+
+        <!-- LEFT -->
+        <a href="/" class="btn btn-light fw-bold">
+            🏠 Home
+        </a>
+
+        <!-- RIGHT -->
+        <div class="d-flex gap-2">
+
+            <a href="/history" class="btn btn-light">
+                History
+            </a>
+
+            <a href="/create-formula" class="btn btn-warning">
+                Create Formula
+            </a>
+
+            <a href="/export-excel" class="btn btn-success">
+                Excel Export
+            </a>
+
         </div>
 
     </div>
+
 </nav>
 
 <div class="container mt-4">

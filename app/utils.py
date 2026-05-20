@@ -1,61 +1,47 @@
-UNIT_CONVERSIONS = {
-
-    'flow_rate': {
-        'GPM': 1,
-        'LPM': 0.264172,
-        'm3/hr': 4.40287
-    },
-
-    'pressure': {
-        'psi': 1,
-        'bar': 14.5038,
-        'kPa': 0.145038
-    },
-
-    'speed': {
-        'km/hr': 1,
-        'm/s': 3.6
-    },
-
-    'time': {
-        'hr': 1,
-        'min': 0.0166667,
-        'sec': 0.000277778
-    },
-    'area': {
-        'm2': 1
-    }
-}
-
-
+from app.unit_conversions import UNIT_CONVERSIONS
 
 
 def convert_to_expected(
+
     value,
+
     variable_type,
-    selected_unit,
+
+    current_unit,
+
     expected_unit
+
 ):
 
-    variable_type = variable_type.strip().lower()
+    try:
+        if value == '' or value is None:
+            raise ValueError("Please enter all values")
 
-    unit_map = UNIT_CONVERSIONS.get(variable_type, {})
+        value = float(value)
 
-    if selected_unit not in unit_map:
+        current_unit = current_unit.strip().lower()
+        expected_unit = expected_unit.strip().lower()
 
-        raise ValueError(
-            f"Unit '{selected_unit}' not found for type '{variable_type}'"
+        # SAME UNIT
+        if current_unit == expected_unit:
+            return value
+
+        # CURRENT → BASE SI
+        base_value = (
+            value *
+            UNIT_CONVERSIONS[current_unit]
         )
 
-    if expected_unit not in unit_map:
-
-        raise ValueError(
-            f"Expected unit '{expected_unit}' not found"
+        # BASE SI → EXPECTED
+        converted_value = (
+            base_value /
+            UNIT_CONVERSIONS[expected_unit]
         )
 
-    if selected_unit == expected_unit:
+        return converted_value
+
+    except Exception as e:
+
+        print("Conversion Error:", e)
+
         return float(value)
-
-    base_value = float(value) * unit_map[selected_unit]
-
-    return base_value / unit_map[expected_unit]

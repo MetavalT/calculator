@@ -5,6 +5,7 @@ from app.services import evaluate_formula
 import pandas as pd
 from flask import redirect
 from flask import flash, redirect, url_for
+from datetime import datetime
 import json
 import os
 
@@ -48,19 +49,6 @@ def export_excel():
 
     calculations = Calculation.query.all()
 
-    data = []
-
-    for calc in calculations:
-
-        data.append({
-            'Formula': calc.formula_name,
-            'Values Used': calc.values_used,
-            'Answer': calc.answer,
-            'Created At': calc.created_at
-        })
-
-    df = pd.DataFrame(data)
-
     export_folder = 'exports'
 
     os.makedirs(export_folder, exist_ok=True)
@@ -70,9 +58,45 @@ def export_excel():
         'calculations.xlsx'
     )
 
-    df.to_excel(file_path, index=False)
+    formula_groups = {}
 
-    return send_file(file_path, as_attachment=True)
+    # Formula wise grouping
+    for calc in calculations:
+
+        if calc.formula_name not in formula_groups:
+
+            formula_groups[calc.formula_name] = []
+
+        formula_groups[calc.formula_name].append({
+
+            'Values Used': calc.values_used,
+            'Answer': calc.answer,
+            'Created At': calc.created_at
+        })
+
+    # Excel create/update
+    with pd.ExcelWriter(
+        file_path,
+        engine='openpyxl',
+        mode='w'
+    ) as writer:
+
+        for formula_name, records in formula_groups.items():
+
+            df = pd.DataFrame(records)
+
+            safe_sheet_name = formula_name[:31]
+
+            df.to_excel(
+                writer,
+                sheet_name=safe_sheet_name,
+                index=False
+            )
+
+    return send_file(
+        file_path,
+        as_attachment=True
+    )
 
 # CREATE FORMULA
 @main.route('/create-formula', methods=['GET', 'POST'])
@@ -87,7 +111,7 @@ def create_formula():
         formula = Formula(
             name=name,
             description=description,
-            expression=expression
+            expression=expression,
         )
 
         db.session.add(formula)
@@ -113,7 +137,7 @@ def create_formula():
 
         db.session.commit()
 
-        return "Formula Created Successfully"
+        return redirect(url_for('main.home'))
 
     return render_template('create_formula.html')
 
@@ -169,7 +193,8 @@ def calculate_api():
     calculation = Calculation(
         formula_name=formula.name,
         values_used=json.dumps(data['values']),
-        answer=str(answer)
+        answer=str(answer),
+        created_at=datetime.utcnow()
     )
 
     db.session.add(calculation)
@@ -195,7 +220,6 @@ def view_formula(formula_id):
         variables=variables
     )
 
-
 # EDIT FORMULA
 @main.route('/edit-formula/<int:formula_id>', methods=['GET', 'POST'])
 def edit_formula(formula_id):
@@ -208,13 +232,44 @@ def edit_formula(formula_id):
 
     if request.method == 'POST':
 
+# formula update
         formula.name = request.form['name']
         formula.description = request.form['description']
         formula.expression = request.form['expression']
 
         db.session.commit()
 
-        return "Formula Updated Successfully"
+# old variables delete
+        FormulaVariable.query.filter_by(
+            formula_id=formula.id
+        ).delete()
+
+# new variables add
+        variable_names = request.form.getlist('variable_name[]')
+        display_names = request.form.getlist('display_name[]')
+        expected_units = request.form.getlist('expected_unit[]')
+        available_units = request.form.getlist('available_units[]')
+        variable_types = request.form.getlist('variable_type[]')
+
+        for i in range(len(variable_names)):
+
+# empty rows skip
+            if variable_names[i].strip() == '':
+                continue
+
+            variable = FormulaVariable(
+                formula_id=formula.id,
+                variable_name=variable_names[i],
+                display_name=display_names[i],
+                expected_unit=expected_units[i],
+                available_units=available_units[i] + '|' + variable_types[i]
+            )
+
+            db.session.add(variable)
+
+        db.session.commit()
+
+        return redirect('/')
 
     return render_template(
         'edit_formula.html',
@@ -222,18 +277,18 @@ def edit_formula(formula_id):
         variables=variables
     )
 
-    # DELETE FORMULA
+# DELETE FORMULA
 @main.route('/delete-formula/<int:formula_id>')
 def delete_formula(formula_id):
 
     formula = Formula.query.get_or_404(formula_id)
 
-    # pehle variables delete karo
+# pehle variables delete karo
     FormulaVariable.query.filter_by(
         formula_id=formula_id
     ).delete()
 
-    # formula delete
+# formula delete
     db.session.delete(formula)
 
     db.session.commit()
