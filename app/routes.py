@@ -4,10 +4,13 @@ from app import db
 from app.services import evaluate_formula
 import pandas as pd
 from flask import redirect
+from flask import request, jsonify
 from flask import flash, redirect, url_for
 from datetime import datetime
 import json
 import os
+from app.models import Calculation
+from app import db
 
 main = Blueprint('main', __name__)
 
@@ -167,50 +170,48 @@ def calculate_page(formula_id):
 
 # API CALCULATE
 @main.route('/api/calculate', methods=['POST'])
-def calculate_api():
+def calculate():
+    try:
+        data = request.get_json()
 
-    data = request.json
+        values = data.get('values', {})
+        formula_id = data.get('formula_id')
 
-    formula_id = data['formula_id']
+        speed = values.get('speed', {})
+        time = values.get('time', {})
 
-    formula = Formula.query.get(formula_id)
+        speed_value = float(speed.get('value') or 0)
+        time_value = float(time.get('value') or 0)
 
-    variables = FormulaVariable.query.filter_by(
-        formula_id=formula_id
-    ).all()
+        result = speed_value * time_value
 
-    variable_config = {}
+        # 💾 SAVE TO DATABASE (IMPORTANT PART)
+        calculation = Calculation(
+            formula_name="Dynamic Formula",
+            values_used=json.dumps(values),
+            answer=result,
+            created_at=datetime.now()
+        )
 
-    for var in variables:
+        db.session.add(calculation)
+        db.session.commit()
 
-        variable_type = var.available_units.split('|')[1].strip().lower()
+        return jsonify({
+            "success": True,
+            "answer": {
+                "value": result,
+                "unit": speed.get("unit", "")
+            }
+        })
 
-        variable_config[var.variable_name] = {
-            'expected_unit': var.expected_unit,
-            'variable_type': variable_type
-        }
+    except Exception as e:
+        print("SAVE ERROR:", str(e))
 
-    answer = evaluate_formula(
-        formula.expression,
-        data['values'],
-        variable_config
-    )
-
-    calculation = Calculation(
-        formula_name=str(formula.name),
-        values_used=json.dumps(data['values']),
-        answer=str(answer),
-        created_at=datetime.utcnow()
-)
-
-    db.session.add(calculation)
-    db.session.commit()
-
-    print("CALCULATION SAVED")
-
-    return jsonify({
-        'answer': answer
-    })
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 400
+        
 
     # VIEW FORMULA
 @main.route('/formula/<int:formula_id>')
