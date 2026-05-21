@@ -75,7 +75,7 @@
 
 </div>
 
-<div <div class="box">
+<div class="box">
 
     <h1>{{ formula.name }}</h1>
 
@@ -150,18 +150,18 @@ async function calculateFormula(){
 
     values["{{ var.variable_name }}"] = {
 
-    value: document.getElementById(
-        "value_{{ var.variable_name }}"
-    ).value,
+        value: document.getElementById(
+            "value_{{ var.variable_name }}"
+        ).value,
 
-    unit: document.getElementById(
-        "unit_{{ var.variable_name }}"
-    ).value
-}
+        unit: units[index]
+    }
 
     index++
 
     {% endfor %}
+
+    console.log(values)
 
     const response = await fetch('/api/calculate', {
 
@@ -172,12 +172,16 @@ async function calculateFormula(){
         },
 
         body: JSON.stringify({
+
             formula_id: {{ formula.id }},
+
             values: values
         })
     })
 
     const data = await response.json()
+
+    console.log(data)
 
     document.getElementById('result').innerHTML =
         "Answer = " + data.answer
