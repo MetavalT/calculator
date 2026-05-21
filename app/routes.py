@@ -49,6 +49,8 @@ def export_excel():
 
     calculations = Calculation.query.all()
 
+    print("TOTAL CALCULATIONS:", len(calculations))
+
     export_folder = 'exports'
 
     os.makedirs(export_folder, exist_ok=True)
@@ -60,7 +62,7 @@ def export_excel():
 
     formula_groups = {}
 
-    # Formula wise grouping
+    # formula wise grouping
     for calc in calculations:
 
         if calc.formula_name not in formula_groups:
@@ -74,11 +76,10 @@ def export_excel():
             'Created At': calc.created_at
         })
 
-    # Excel create/update
+    # NEW FILE EVERY TIME
     with pd.ExcelWriter(
         file_path,
-        engine='openpyxl',
-        mode='w'
+        engine='openpyxl'
     ) as writer:
 
         for formula_name, records in formula_groups.items():
@@ -87,15 +88,20 @@ def export_excel():
 
             safe_sheet_name = formula_name[:31]
 
+            print(df)
+
             df.to_excel(
                 writer,
                 sheet_name=safe_sheet_name,
                 index=False
             )
 
+    print("EXCEL GENERATED")
+
     return send_file(
-        file_path,
-        as_attachment=True
+        os.path.abspath(file_path),
+        as_attachment=True,
+        download_name='calculations.xlsx'
     )
 
 # CREATE FORMULA
@@ -191,14 +197,16 @@ def calculate_api():
     )
 
     calculation = Calculation(
-        formula_name=formula.name,
+        formula_name=str(formula.name),
         values_used=json.dumps(data['values']),
         answer=str(answer),
         created_at=datetime.utcnow()
-    )
+)
 
     db.session.add(calculation)
     db.session.commit()
+
+    print("CALCULATION SAVED")
 
     return jsonify({
         'answer': answer

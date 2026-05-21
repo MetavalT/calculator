@@ -1,3 +1,7 @@
+# This file contains the unit conversion factors for various units.
+# Each unit is defined in terms of a base SI unit for its category (e.g., meter for distance, second for time).
+# 😎🙄🤐
+
 UNIT_CONVERSIONS = {
 
     # =========================
@@ -44,5 +48,13 @@ UNIT_CONVERSIONS = {
 
     'm3/sec': 1,
     'm3/hr': 0.000277778,
-    'gpm': 0.0000630902
+    'gpm': 0.0000630902,
+
+  # =========================
+    # jyada kuch nahi hai bas none case ke liye h nhi to error dega 😁
+    # =========================
+
+    'none': {
+    'none': 1
+}
 }

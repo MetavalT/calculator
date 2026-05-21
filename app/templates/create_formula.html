@@ -41,68 +41,86 @@
 
     <h4>Variables</h4>
 
-    <div id="variables-container">
+<div class="alert alert-info">
 
-        <div class="row mb-3 variable-row">
+    Example Unit Groups:
 
-            <div class="col">
-                <input
-                    type="text"
-                    name="variable_name[]"
-                    placeholder="speed"
-                    class="form-control"
-                >
-            </div>
+    <br><br>
 
-            <div class="col">
-                <input
-                    type="text"
-                    name="display_name[]"
-                    placeholder="Speed"
-                    class="form-control"
-                >
-            </div>
+    km/hr|hr
 
-            <div class="col">
-                <input
-                    type="text"
-                    name="expected_unit[]"
-                    placeholder="km/hr"
-                    class="form-control"
-                >
-            </div>
+    <br>
 
-            <div class="col">
-                <input
-                    type="text"
-                    name="available_units[]"
-                    placeholder="km/hr,m/s"
-                    class="form-control"
-                >
-            </div>
+    m/s|sec
 
-            <div class="col">
-                <input
-                    type="text"
-                    name="variable_type[]"
-                    placeholder="speed"
-                    class="form-control"
-                >
-            </div>
+    <br>
 
-            <div class="col">
-                <button
-                    type="button"
-                    class="btn btn-danger"
-                    onclick="removeVariable(this)"
-                >
-                    X
-                </button>
-            </div>
+    mph|min
 
+</div>
+
+<div id="variables-container">
+
+    <div class="row mb-3 variable-row">
+
+        <div class="col">
+            <input
+                type="text"
+                name="variable_name[]"
+                placeholder="speed"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="display_name[]"
+                placeholder="Speed"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="expected_unit[]"
+                placeholder="km/hr"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="available_units[]"
+                placeholder="km/hr|hr,m/s|sec,mph|min"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <input
+                type="text"
+                name="variable_type[]"
+                placeholder="speed"
+                class="form-control"
+            >
+        </div>
+
+        <div class="col">
+            <button
+                type="button"
+                class="btn btn-danger"
+                onclick="removeVariable(this)"
+            >
+                X
+            </button>
         </div>
 
     </div>
+
+</div>
 
     <button
         type="button"

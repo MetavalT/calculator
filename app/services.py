@@ -1,4 +1,5 @@
 from app.utils import convert_to_expected
+import math
 
 
 def evaluate_formula(
@@ -13,15 +14,14 @@ def evaluate_formula(
 
     processed_values = {}
 
-    # =========================
-    # UNIT CONVERSION
-    # =========================
-
     for variable_name, value_data in variables.items():
 
         value = value_data['value']
 
-        selected_unit = value_data['unit']
+        selected_unit = value_data.get(
+            'unit',
+            expected_unit
+        )
 
         config = variable_config[variable_name]
 
@@ -43,11 +43,12 @@ def evaluate_formula(
 
         processed_values[variable_name] = converted_value
 
-    # =========================
-    # REPLACE VARIABLES
-    # =========================
+    final_expression = expression.replace("^", "**")
 
-    final_expression = expression
+    final_expression = final_expression.replace(
+    "sqrt",
+    "math.sqrt"
+)
 
     for variable, value in processed_values.items():
 
@@ -56,15 +57,7 @@ def evaluate_formula(
             str(value)
         )
 
-    # =========================
-    # CALCULATE
-    # =========================
-
     result = eval(final_expression)
-
-    # =========================
-    # ROUNDING
-    # =========================
 
     if result == int(result):
         result = int(result)

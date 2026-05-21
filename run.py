@@ -1,10 +1,16 @@
 from app import create_app
 
+print("1. Starting App")
+
 app = create_app()
 
+print("2. App Created")
+
 if __name__ == '__main__':
+
+    print("3. Running Server")
+
     app.run(
-        host='127.0.0.1',
-        port=5000,
-        debug=True
+        debug=True,
+        use_reloader=False
     )

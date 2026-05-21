@@ -75,7 +75,7 @@
 
 </div>
 
-<div class="box">
+<div <div class="box">
 
     <h1>{{ formula.name }}</h1>
 
@@ -86,9 +86,29 @@
         {{ formula.expression }}
     </div>
 
-    {% for var in variables %}
+    <label>
+        Select Unit System
+    </label>
 
-        {% set units = var.available_units.split('|')[0].split(',') %}
+    <select id="unit_system">
+
+        {% set first_var = variables[0] %}
+
+        {% set systems = first_var.available_units.split(',') %}
+
+        {% for system in systems %}
+
+            <option value="{{ system }}">
+                {{ system.replace('|', ' & ') }}
+            </option>
+
+        {% endfor %}
+
+    </select>
+
+    <hr>
+
+    {% for var in variables %}
 
         <label>{{ var.display_name }}</label>
 
@@ -97,14 +117,6 @@
             id="value_{{ var.variable_name }}"
             placeholder="Enter {{ var.display_name }}"
         >
-
-        <select id="unit_{{ var.variable_name }}">
-
-            {% for unit in units %}
-                <option value="{{ unit }}">{{ unit }}</option>
-            {% endfor %}
-
-        </select>
 
     {% endfor %}
 
@@ -125,18 +137,29 @@ async function calculateFormula(){
 
     let values = {}
 
+    let selectedSystem =
+        document.getElementById(
+            'unit_system'
+        ).value
+
+    let units = selectedSystem.split('|')
+
+    let index = 0
+
     {% for var in variables %}
 
     values["{{ var.variable_name }}"] = {
 
-        value: document.getElementById(
-            "value_{{ var.variable_name }}"
-        ).value,
+    value: document.getElementById(
+        "value_{{ var.variable_name }}"
+    ).value,
 
-        unit: document.getElementById(
-            "unit_{{ var.variable_name }}"
-        ).value
-    }
+    unit: document.getElementById(
+        "unit_{{ var.variable_name }}"
+    ).value
+}
+
+    index++
 
     {% endfor %}
 
