@@ -183,8 +183,18 @@ async function calculateFormula(){
 
     console.log(data)
 
+    // ERROR HANDLE
+    if(data.success === false){
+
+        document.getElementById('result').innerHTML =
+            "Error : " + data.error
+
+        return
+    }
+
+    // SUCCESS
     document.getElementById('result').innerHTML =
-        "Answer = " + data.answer
+        "Answer = " + data.answer.value
 }
 
 </script>

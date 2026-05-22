@@ -14,25 +14,52 @@ def convert_to_expected(
 ):
 
     try:
+
         if value == '' or value is None:
-            raise ValueError("Please enter all values")
+
+            raise ValueError(
+                "Please enter all values"
+            )
 
         value = float(value)
 
-        current_unit = current_unit.strip().lower()
-        expected_unit = expected_unit.strip().lower()
+        # CLEAN UNITS
+        current_unit = str(current_unit).strip().lower()
+
+        expected_unit = str(expected_unit).strip().lower()
+
+        variable_type = str(variable_type).strip().lower()
+
+        # NO UNIT CASE
+        if current_unit in ['', 'none', 'null']:
+
+            return value
 
         # SAME UNIT
         if current_unit == expected_unit:
+
             return value
 
-        # CURRENT → BASE SI
+        # UNIT EXIST CHECK
+        if current_unit not in UNIT_CONVERSIONS:
+
+            raise Exception(
+                f"Unit not found: {current_unit}"
+            )
+
+        if expected_unit not in UNIT_CONVERSIONS:
+
+            raise Exception(
+                f"Unit not found: {expected_unit}"
+            )
+
+        # CURRENT → BASE
         base_value = (
             value *
             UNIT_CONVERSIONS[current_unit]
         )
 
-        # BASE SI → EXPECTED
+        # BASE → EXPECTED
         converted_value = (
             base_value /
             UNIT_CONVERSIONS[expected_unit]

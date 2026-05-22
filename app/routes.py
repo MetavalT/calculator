@@ -91,7 +91,7 @@ def export_excel():
 
             safe_sheet_name = formula_name[:31]
 
-            print(df)
+            print(f"{formula_name} Records:", len(df))
 
             df.to_excel(
                 writer,
@@ -170,46 +170,66 @@ def calculate_page(formula_id):
 
 # API CALCULATE
 @main.route('/api/calculate', methods=['POST'])
-def calculate():
-    try:
-        data = request.get_json()
+def calculate_api():
 
-        values = data.get('values', {})
+    try:
+
+        data = request.json
+
         formula_id = data.get('formula_id')
 
-        speed = values.get('speed', {})
-        time = values.get('time', {})
+        selected_formula = Formula.query.get(formula_id)
 
-        speed_value = float(speed.get('value') or 0)
-        time_value = float(time.get('value') or 0)
+        if not selected_formula:
 
-        result = speed_value * time_value
+            return jsonify({
+                'success': False,
+                'error': 'Formula not found'
+            }), 404
 
-        # 💾 SAVE TO DATABASE (IMPORTANT PART)
+        variables = FormulaVariable.query.filter_by(
+            formula_id=formula_id
+        ).all()
+
+        variable_config = {}
+
+        for var in variables:
+
+            variable_type = var.available_units.split('|')[1].strip().lower()
+
+            variable_config[var.variable_name] = {
+                'expected_unit': var.expected_unit,
+                'variable_type': variable_type
+            }
+
+        answer = evaluate_formula(
+            selected_formula.expression,
+            data['values'],
+            variable_config
+        )
+
         calculation = Calculation(
-            formula_name="Dynamic Formula",
-            values_used=json.dumps(values),
-            answer=result,
-            created_at=datetime.now()
+            formula_name=selected_formula.name,
+            values_used=json.dumps(data['values']),
+            answer=str(answer['value']),
+            created_at=datetime.utcnow()
         )
 
         db.session.add(calculation)
         db.session.commit()
 
         return jsonify({
-            "success": True,
-            "answer": {
-                "value": result,
-                "unit": speed.get("unit", "")
-            }
+            'success': True,
+            'answer': answer
         })
 
     except Exception as e:
-        print("SAVE ERROR:", str(e))
+
+        print("SAVE ERROR:", e)
 
         return jsonify({
-            "success": False,
-            "error": str(e)
+            'success': False,
+            'error': str(e)
         }), 400
         
 
@@ -249,11 +269,17 @@ def edit_formula(formula_id):
         db.session.commit()
 
 # old variables delete
-        FormulaVariable.query.filter_by(
+        old_variables = FormulaVariable.query.filter_by(
             formula_id=formula.id
-        ).delete()
+        ).all()
 
-# new variables add
+        for old in old_variables:
+            db.session.delete(old)
+
+        db.session.commit()
+
+        db.session.expire_all()
+
         variable_names = request.form.getlist('variable_name[]')
         display_names = request.form.getlist('display_name[]')
         expected_units = request.form.getlist('expected_unit[]')
