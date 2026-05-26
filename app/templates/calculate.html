@@ -142,26 +142,39 @@ async function calculateFormula(){
             'unit_system'
         ).value
 
-    let units = selectedSystem.split('|')
+    let units = selectedSystem.split("|")
 
-    let index = 0
+{% for var in variables %}
 
-    {% for var in variables %}
+values["{{ var.variable_name }}"] = {
 
-    values["{{ var.variable_name }}"] = {
+    value: document.getElementById(
+        "value_{{ var.variable_name }}"
+    ).value,
 
-        value: document.getElementById(
-            "value_{{ var.variable_name }}"
-        ).value,
+    unit: units[{{ loop.index0 }}]
+}
 
-        unit: units[index]
-    }
-
-    index++
-
-    {% endfor %}
+{% endfor %}
 
     console.log(values)
+
+    // INPUT VALIDATION
+    for(let key in values){
+
+        if(values[key].value === ""){
+
+            let resultBox =
+                document.getElementById('result')
+
+            resultBox.style.color = "red"
+
+            resultBox.innerHTML =
+                "Please enter all values"
+
+            return
+        }
+    }
 
     const response = await fetch('/api/calculate', {
 
@@ -183,18 +196,28 @@ async function calculateFormula(){
 
     console.log(data)
 
-    // ERROR HANDLE
-    if(data.success === false){
+    let resultBox =
+        document.getElementById('result')
 
-        document.getElementById('result').innerHTML =
+    // ERROR HANDLE
+    if(!response.ok || data.success === false){
+
+        resultBox.style.color = "red"
+
+        resultBox.innerHTML =
             "Error : " + data.error
 
         return
     }
 
     // SUCCESS
-    document.getElementById('result').innerHTML =
-        "Answer = " + data.answer.value
+    resultBox.style.color = "green"
+
+    resultBox.innerHTML =
+        "Answer = " +
+        data.answer.value +
+        " " +
+        data.answer.unit
 }
 
 </script>

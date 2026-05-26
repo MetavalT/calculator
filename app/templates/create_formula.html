@@ -7,6 +7,7 @@
 <form method="POST">
 
     <div class="mb-3">
+
         <label>Formula Name</label>
 
         <input
@@ -14,113 +15,150 @@
             name="name"
             class="form-control"
             placeholder="Distance Calculator"
+            required
         >
+
     </div>
 
     <div class="mb-3">
+
         <label>Description</label>
 
         <textarea
             name="description"
             class="form-control"
             placeholder="Calculate distance using speed and time"
+            required
         ></textarea>
+
     </div>
 
     <div class="mb-3">
+
         <label>Expression</label>
 
         <textarea
             name="expression"
             class="form-control"
             placeholder="speed * time"
+            required
         ></textarea>
+
+        <small class="text-muted">
+
+            Use:
+            +  -  *  /  sqrt()
+
+            <br>
+
+            Example:
+            Q * sqrt(SG) / sqrt(DP)
+
+        </small>
+
     </div>
 
     <hr>
 
     <h4>Variables</h4>
 
-<div class="alert alert-info">
+    <div class="alert alert-info">
 
-    Example Unit Groups:
+        Example Unit Groups:
 
-    <br><br>
+        <br><br>
 
-    km/hr|hr
+        km/hr|hr
 
-    <br>
+        <br>
 
-    m/s|sec
+        m/sec|sec
 
-    <br>
+        <br>
 
-    mph|min
-
-</div>
-
-<div id="variables-container">
-
-    <div class="row mb-3 variable-row">
-
-        <div class="col">
-            <input
-                type="text"
-                name="variable_name[]"
-                placeholder="speed"
-                class="form-control"
-            >
-        </div>
-
-        <div class="col">
-            <input
-                type="text"
-                name="display_name[]"
-                placeholder="Speed"
-                class="form-control"
-            >
-        </div>
-
-        <div class="col">
-            <input
-                type="text"
-                name="expected_unit[]"
-                placeholder="km/hr"
-                class="form-control"
-            >
-        </div>
-
-        <div class="col">
-            <input
-                type="text"
-                name="available_units[]"
-                placeholder="km/hr|hr,m/s|sec,mph|min"
-                class="form-control"
-            >
-        </div>
-
-        <div class="col">
-            <input
-                type="text"
-                name="variable_type[]"
-                placeholder="speed"
-                class="form-control"
-            >
-        </div>
-
-        <div class="col">
-            <button
-                type="button"
-                class="btn btn-danger"
-                onclick="removeVariable(this)"
-            >
-                X
-            </button>
-        </div>
+        gpm|psi
 
     </div>
 
-</div>
+    <div id="variables-container">
+
+        <div class="row mb-3 variable-row">
+
+            <div class="col">
+
+                <input
+                    type="text"
+                    name="variable_name[]"
+                    placeholder="speed"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+            <div class="col">
+
+                <input
+                    type="text"
+                    name="display_name[]"
+                    placeholder="Speed"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+            <div class="col">
+
+                <input
+                    type="text"
+                    name="expected_unit[]"
+                    placeholder="km/hr"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+            <div class="col">
+
+                <input
+                    type="text"
+                    name="available_units[]"
+                    placeholder="km/hr|hr,m/sec|sec"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+            <div class="col">
+
+                <input
+                    type="text"
+                    name="variable_type[]"
+                    placeholder="speed"
+                    class="form-control"
+                    required
+                >
+
+            </div>
+
+            <div class="col">
+
+                <button
+                    type="button"
+                    class="btn btn-danger"
+                    onclick="removeVariable(this)"
+                >
+                    X
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
 
     <button
         type="button"
@@ -148,51 +186,67 @@ function addVariable(){
     <div class="row mb-3 variable-row">
 
         <div class="col">
+
             <input
                 type="text"
                 name="variable_name[]"
                 placeholder="distance"
                 class="form-control"
+                required
             >
+
         </div>
 
         <div class="col">
+
             <input
                 type="text"
                 name="display_name[]"
                 placeholder="Distance"
                 class="form-control"
+                required
             >
+
         </div>
 
         <div class="col">
+
             <input
                 type="text"
                 name="expected_unit[]"
                 placeholder="km"
                 class="form-control"
+                required
             >
+
         </div>
 
         <div class="col">
+
             <input
                 type="text"
                 name="available_units[]"
                 placeholder="km,m"
                 class="form-control"
+                required
             >
+
         </div>
 
         <div class="col">
+
             <input
                 type="text"
                 name="variable_type[]"
                 placeholder="distance"
                 class="form-control"
+                required
             >
+
         </div>
 
         <div class="col">
+
             <button
                 type="button"
                 class="btn btn-danger"
@@ -200,6 +254,7 @@ function addVariable(){
             >
                 X
             </button>
+
         </div>
 
     </div>

@@ -49,6 +49,8 @@ UNIT_CONVERSIONS = {
     'm3/sec': 1,
     'm3/hr': 0.000277778,
     'gpm': 0.0000630902,
+    'lpm': 0.0000166667,
+    'kg/hr': 0.000277778,
 
   # =========================
     # jyada kuch nahi hai bas none case ke liye h nhi to error dega 😁

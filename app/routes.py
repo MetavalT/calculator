@@ -9,8 +9,7 @@ from flask import flash, redirect, url_for
 from datetime import datetime
 import json
 import os
-from app.models import Calculation
-from app import db
+import logging
 
 main = Blueprint('main', __name__)
 
@@ -65,7 +64,6 @@ def export_excel():
 
     formula_groups = {}
 
-    # formula wise grouping
     for calc in calculations:
 
         if calc.formula_name not in formula_groups:
@@ -79,7 +77,6 @@ def export_excel():
             'Created At': calc.created_at
         })
 
-    # NEW FILE EVERY TIME
     with pd.ExcelWriter(
         file_path,
         engine='openpyxl'
@@ -90,8 +87,6 @@ def export_excel():
             df = pd.DataFrame(records)
 
             safe_sheet_name = formula_name[:31]
-
-            print(f"{formula_name} Records:", len(df))
 
             df.to_excel(
                 writer,
@@ -106,6 +101,7 @@ def export_excel():
         as_attachment=True,
         download_name='calculations.xlsx'
     )
+
 
 # CREATE FORMULA
 @main.route('/create-formula', methods=['GET', 'POST'])
@@ -133,6 +129,9 @@ def create_formula():
         variable_types = request.form.getlist('variable_type[]')
 
         for i in range(len(variables)):
+
+            if variables[i].strip() == '':
+                continue
 
             variable = FormulaVariable(
                 formula_id=formula.id,
@@ -195,23 +194,34 @@ def calculate_api():
 
         for var in variables:
 
-            variable_type = var.available_units.split('|')[1].strip().lower()
+            parts = var.available_units.split('|')
+
+            variable_type = "none"
+
+            if len(parts) > 1:
+                variable_type = parts[-1].strip().lower()
 
             variable_config[var.variable_name] = {
+
                 'expected_unit': var.expected_unit,
                 'variable_type': variable_type
             }
 
         answer = evaluate_formula(
+
             selected_formula.expression,
             data['values'],
             variable_config
         )
 
         calculation = Calculation(
+
             formula_name=selected_formula.name,
+
             values_used=json.dumps(data['values']),
+
             answer=str(answer['value']),
+
             created_at=datetime.utcnow()
         )
 
@@ -219,21 +229,26 @@ def calculate_api():
         db.session.commit()
 
         return jsonify({
+
             'success': True,
             'answer': answer
         })
 
     except Exception as e:
 
+        logging.error(str(e))
+
         print("SAVE ERROR:", e)
 
         return jsonify({
+
             'success': False,
             'error': str(e)
-        }), 400
-        
 
-    # VIEW FORMULA
+        }), 400
+
+
+# VIEW FORMULA
 @main.route('/formula/<int:formula_id>')
 def view_formula(formula_id):
 
@@ -249,6 +264,7 @@ def view_formula(formula_id):
         variables=variables
     )
 
+
 # EDIT FORMULA
 @main.route('/edit-formula/<int:formula_id>', methods=['GET', 'POST'])
 def edit_formula(formula_id):
@@ -261,24 +277,15 @@ def edit_formula(formula_id):
 
     if request.method == 'POST':
 
-# formula update
         formula.name = request.form['name']
         formula.description = request.form['description']
         formula.expression = request.form['expression']
 
         db.session.commit()
 
-# old variables delete
-        old_variables = FormulaVariable.query.filter_by(
+        FormulaVariable.query.filter_by(
             formula_id=formula.id
-        ).all()
-
-        for old in old_variables:
-            db.session.delete(old)
-
-        db.session.commit()
-
-        db.session.expire_all()
+        ).delete()
 
         variable_names = request.form.getlist('variable_name[]')
         display_names = request.form.getlist('display_name[]')
@@ -288,7 +295,6 @@ def edit_formula(formula_id):
 
         for i in range(len(variable_names)):
 
-# empty rows skip
             if variable_names[i].strip() == '':
                 continue
 
@@ -312,18 +318,17 @@ def edit_formula(formula_id):
         variables=variables
     )
 
+
 # DELETE FORMULA
 @main.route('/delete-formula/<int:formula_id>')
 def delete_formula(formula_id):
 
     formula = Formula.query.get_or_404(formula_id)
 
-# pehle variables delete karo
     FormulaVariable.query.filter_by(
         formula_id=formula_id
     ).delete()
 
-# formula delete
     db.session.delete(formula)
 
     db.session.commit()

@@ -1,69 +1,6 @@
-# from app.utils import convert_to_expected
-# import math
-
-
-# def evaluate_formula(
-#     expression,
-#     variables,
-#     variable_config
-# ):
-
-#     processed_values = {}
-
-#     for variable_name, value_data in variables.items():
-
-#         value = value_data['value']
-
-#         config = variable_config[variable_name]
-
-#         expected_unit = config['expected_unit']
-
-#         variable_type = config['variable_type']
-
-#         # agar unit nahi aayi
-#         selected_unit = value_data.get(
-#             'unit',
-#             expected_unit
-#         )
-
-#         converted_value = convert_to_expected(
-
-#             value,
-#             variable_type,
-#             selected_unit,
-#             expected_unit
-#         )
-
-#         processed_values[variable_name] = converted_value
-
-#     final_expression = expression
-
-#     for variable, value in processed_values.items():
-
-#         final_expression = final_expression.replace(
-#             variable,
-#             str(value)
-#         )
-
-#     result = eval(
-#         final_expression,
-#         {"sqrt": math.sqrt}
-#     )
-
-#     if result == int(result):
-#         result = int(result)
-#     else:
-#         result = round(result, 4)
-
-#     return {
-#         "value": result,
-#         "unit": ""
-#     }
-
-
-
 from app.utils import convert_to_expected
 from asteval import Interpreter
+import math
 
 
 def evaluate_formula(
@@ -78,27 +15,8 @@ def evaluate_formula(
 
         value = value_data['value']
 
-        config = variable_config[variable_name]
 
-        expected_unit = config['expected_unit']
-
-        variable_type = config['variable_type']
-
-        # agar unit nahi aayi
-        selected_unit = value_data.get(
-            'unit',
-            expected_unit
-        )
-
-        converted_value = convert_to_expected(
-
-            value,
-            variable_type,
-            selected_unit,
-            expected_unit
-        )
-
-        processed_values[variable_name] = converted_value
+        processed_values[variable_name] = float(value)
 
     final_expression = expression
 
@@ -109,17 +27,35 @@ def evaluate_formula(
             str(value)
         )
 
-    # SAFE EVALUATION
-    aeval = Interpreter()
+    # SAFE FORMULA EVALUATION
+    aeval = Interpreter(
+
+        usersyms={
+            "sqrt": math.sqrt
+        }
+    )
 
     result = aeval(final_expression)
 
+    # ERROR CHECK
+    if aeval.error:
+
+        raise Exception(
+            "Invalid Formula Expression"
+        )
+
+    # ROUNDING
     if result == int(result):
+
         result = int(result)
+
     else:
+
         result = round(result, 4)
 
     return {
+
         "value": result,
+
         "unit": ""
     }

@@ -6,5 +6,7 @@ pandas
 openpyxl
 python-dotenv
 asteval
+flask-migrate
+
 
 # pip install -r requirements.txt
