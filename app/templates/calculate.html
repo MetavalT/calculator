@@ -1,226 +1,156 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>{{ formula.name }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ formula.name }} — Metaval Engineering</title>
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-
-        body{
-            font-family: Arial;
-            background:#f4f4f4;
-        }
-
-        .top-bar{
-            background:#212529;
-            padding:15px;
-        }
-
-        .top-bar a{
-            color:white;
-            text-decoration:none;
-            margin-right:15px;
-            font-weight:bold;
-        }
-
-        .box{
-            width:500px;
-            margin:40px auto;
-            background:white;
-            border:1px solid #ccc;
-            padding:20px;
-            border-radius:10px;
-        }
-
-        input, select{
-            width:100%;
-            padding:10px;
-            margin-top:5px;
-            margin-bottom:15px;
-        }
-
-        button{
-            padding:10px 20px;
-            cursor:pointer;
-        }
-
-        .result{
-            margin-top:20px;
-            font-size:22px;
-            font-weight:bold;
-            color:green;
-        }
-
-        .formula-box{
-            background:#f4f4f4;
-            padding:10px;
-            margin-bottom:20px;
-            border-radius:5px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
 
-<!-- TOP NAVBAR -->
-<div class="top-bar">
+<!-- NAVBAR -->
+<nav class="mv-nav">
+    <a href="/" class="mv-nav-brand">
+        <span class="brand-dot"></span>
+        Metaval &nbsp;<span style="font-weight:300;opacity:0.55;">|</span>&nbsp; Engineering Calc
+    </a>
+    <div class="mv-nav-links">
+        <a href="/" class="nav-outline">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Home
+        </a>
+        <a href="/history" class="nav-outline">History</a>
+        <a href="/create-formula" class="nav-primary">+ Create Formula</a>
+    </div>
+</nav>
 
-    <a href="/">Home</a>
+<main class="mv-main" style="max-width:680px;">
 
-    <a href="/history">History</a>
-
-    <a href="/create-formula">Create Formula</a>
-
-</div>
-
-<div class="box">
-
-    <h1>{{ formula.name }}</h1>
-
-    <p>{{ formula.description }}</p>
-
-    <div class="formula-box">
-        <strong>Formula:</strong>
-        {{ formula.expression }}
+    <!-- BREADCRUMB -->
+    <div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--text-muted);margin-bottom:1.5rem;">
+        <a href="/" style="color:var(--text-muted);text-decoration:none;">Home</a>
+        <span>›</span>
+        <span style="color:var(--text-white);">{{ formula.name }}</span>
     </div>
 
-    <label>
-        Select Unit System
-    </label>
+    <!-- HEADER -->
+    <div class="mv-page-header">
+        <span class="mv-card-tag">Formula Calculator</span>
+        <h2 style="margin-top:6px;">{{ formula.name }}</h2>
+        <p>{{ formula.description }}</p>
+    </div>
 
-    <select id="unit_system">
+    <!-- FORMULA EXPRESSION -->
+    <div class="mv-section-label">Expression</div>
+    <div class="mv-formula-box">{{ formula.expression }}</div>
 
-        {% set first_var = variables[0] %}
+    <!-- CARD -->
+    <div class="mv-card" style="margin-top:1.5rem;">
 
-        {% set systems = first_var.available_units.split(',') %}
+        <!-- UNIT SYSTEM -->
+        <div class="mv-form-group">
+            <label class="mv-label">Unit System</label>
+            <select id="unit_system">
+                {% set first_var = variables[0] %}
+                {% set systems = first_var.available_units.split(',') %}
+                {% for system in systems %}
+                <option value="{{ system }}">{{ system.replace('|', ' & ') }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        {% for system in systems %}
+        <hr class="mv-divider">
 
-            <option value="{{ system }}">
-                {{ system.replace('|', ' & ') }}
-            </option>
-
+        <!-- VARIABLE INPUTS -->
+        {% for var in variables %}
+        <div class="mv-form-group">
+            <label class="mv-label" for="value_{{ var.variable_name }}">{{ var.display_name }}</label>
+            <input
+                type="number"
+                id="value_{{ var.variable_name }}"
+                placeholder="Enter {{ var.display_name }}"
+                step="any"
+            >
+        </div>
         {% endfor %}
 
-    </select>
+        <!-- CALCULATE BUTTON -->
+        <button class="mv-btn mv-btn-primary" style="width:100%;justify-content:center;padding:12px;" onclick="calculateFormula()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="9" y2="15"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            Calculate
+        </button>
 
-    <hr>
+        <!-- RESULT BOX -->
+        <div class="mv-result" id="result-box">
+            <div class="mv-result-label">Result</div>
+            <div class="mv-result-value" id="result-value"></div>
+        </div>
 
-    {% for var in variables %}
+    </div>
 
-        <label>{{ var.display_name }}</label>
+    <div style="margin-top:1rem;">
+        <a href="/formula/{{ formula.id }}" class="mv-btn mv-btn-outline mv-btn-sm">View Formula Details</a>
+    </div>
 
-        <input
-            type="number"
-            id="value_{{ var.variable_name }}"
-            placeholder="Enter {{ var.display_name }}"
-        >
+</main>
 
-    {% endfor %}
-
-    <button
-        class="btn btn-primary"
-        onclick="calculateFormula()"
-    >
-        Calculate
-    </button>
-
-    <div class="result" id="result"></div>
-
-</div>
+<footer class="mv-footer">
+    Metaval Engineering Calculator &nbsp;·&nbsp; <a href="https://metaval.com" target="_blank">metaval.com</a>
+</footer>
 
 <script>
-
-async function calculateFormula(){
-
+async function calculateFormula() {
     let values = {}
+    let selectedSystem = document.getElementById('unit_system').value
+    let units = selectedSystem.split('|')
+    let resultBox = document.getElementById('result-box')
+    let resultValue = document.getElementById('result-value')
 
-    let selectedSystem =
-        document.getElementById(
-            'unit_system'
-        ).value
+    {% for var in variables %}
+    values["{{ var.variable_name }}"] = {
+        value: document.getElementById("value_{{ var.variable_name }}").value,
+        unit: units[{{ loop.index0 }}]
+    }
+    {% endfor %}
 
-    let units = selectedSystem.split("|")
-
-{% for var in variables %}
-
-values["{{ var.variable_name }}"] = {
-
-    value: document.getElementById(
-        "value_{{ var.variable_name }}"
-    ).value,
-
-    unit: units[{{ loop.index0 }}]
-}
-
-{% endfor %}
-
-    console.log(values)
-
-    // INPUT VALIDATION
-    for(let key in values){
-
-        if(values[key].value === ""){
-
-            let resultBox =
-                document.getElementById('result')
-
-            resultBox.style.color = "red"
-
-            resultBox.innerHTML =
-                "Please enter all values"
-
+    // Validation
+    for (let key in values) {
+        if (values[key].value === '') {
+            resultBox.className = 'mv-result show error'
+            resultValue.textContent = 'Please fill in all values before calculating.'
             return
         }
     }
 
-    const response = await fetch('/api/calculate', {
-
-        method:'POST',
-
-        headers:{
-            'Content-Type':'application/json'
-        },
-
-        body: JSON.stringify({
-
-            formula_id: {{ formula.id }},
-
-            values: values
+    try {
+        const response = await fetch('/api/calculate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ formula_id: {{ formula.id }}, values: values })
         })
-    })
+        const data = await response.json()
 
-    const data = await response.json()
-
-    console.log(data)
-
-    let resultBox =
-        document.getElementById('result')
-
-    // ERROR HANDLE
-    if(!response.ok || data.success === false){
-
-        resultBox.style.color = "red"
-
-        resultBox.innerHTML =
-            "Error : " + data.error
-
-        return
+        if (!response.ok || data.success === false) {
+            resultBox.className = 'mv-result show error'
+            resultValue.textContent = 'Error: ' + data.error
+        } else {
+            resultBox.className = 'mv-result show success'
+            resultValue.textContent = data.answer.value + ' ' + data.answer.unit
+        }
+    } catch (err) {
+        resultBox.className = 'mv-result show error'
+        resultValue.textContent = 'Network error. Please try again.'
     }
-
-    // SUCCESS
-    resultBox.style.color = "green"
-
-    resultBox.innerHTML =
-        "Answer = " +
-        data.answer.value +
-        " " +
-        data.answer.unit
 }
 
+// Allow Enter key to calculate
+document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') calculateFormula()
+})
 </script>
-
 </body>
 </html>

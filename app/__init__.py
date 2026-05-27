@@ -4,8 +4,11 @@ from flask_migrate import Migrate
 from config import Config
 import logging
 import os
+from flask_login import LoginManager
 
 db = SQLAlchemy()
+
+login_manager = LoginManager()
 
 
 def create_app():
@@ -18,6 +21,8 @@ def create_app():
 
     migrate = Migrate(app, db)
 
+    login_manager.init_app(app)
+
     os.makedirs('logs', exist_ok=True)
 
     logging.basicConfig(
@@ -27,7 +32,12 @@ def create_app():
     )
 
     from app.routes import main
-
     app.register_blueprint(main)
+
+    from app.models import User
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
 
     return app

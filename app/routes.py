@@ -10,6 +10,13 @@ from datetime import datetime
 import json
 import os
 import logging
+from flask_login import (
+    login_user,
+    logout_user,
+    login_required,
+    current_user
+)
+
 
 main = Blueprint('main', __name__)
 
@@ -106,6 +113,11 @@ def export_excel():
 # CREATE FORMULA
 @main.route('/create-formula', methods=['GET', 'POST'])
 def create_formula():
+    if not current_user.is_authenticated:
+        return redirect('/login')
+
+    if not current_user.is_admin:
+        return "Access Denied"
 
     if request.method == 'POST':
 
@@ -268,6 +280,11 @@ def view_formula(formula_id):
 # EDIT FORMULA
 @main.route('/edit-formula/<int:formula_id>', methods=['GET', 'POST'])
 def edit_formula(formula_id):
+    if not current_user.is_authenticated:
+        return redirect('/login')
+
+    if not current_user.is_admin:
+        return "Access Denied"
 
     formula = Formula.query.get_or_404(formula_id)
 
@@ -322,6 +339,11 @@ def edit_formula(formula_id):
 # DELETE FORMULA
 @main.route('/delete-formula/<int:formula_id>')
 def delete_formula(formula_id):
+    if not current_user.is_authenticated:
+        return redirect('/login')
+
+    if not current_user.is_admin:
+        return "Access Denied"
 
     formula = Formula.query.get_or_404(formula_id)
 
@@ -332,5 +354,39 @@ def delete_formula(formula_id):
     db.session.delete(formula)
 
     db.session.commit()
+
+    return redirect('/')
+
+# LOGIN PAGE
+@main.route('/login', methods=['GET', 'POST'])
+def login():
+
+    from app.models import User
+
+    if request.method == 'POST':
+
+        username = request.form['username']
+        password = request.form['password']
+
+        user = User.query.filter_by(
+            username=username
+        ).first()
+
+        if user and user.check_password(password):
+
+            login_user(user)
+
+            return redirect('/')
+
+        return "Invalid Username or Password"
+
+    return render_template('login.html')
+
+# LOGOUT
+@main.route('/logout')
+@login_required
+def logout():
+
+    logout_user()
 
     return redirect('/')
