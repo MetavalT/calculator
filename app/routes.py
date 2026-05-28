@@ -1,22 +1,30 @@
-from flask import Blueprint, render_template, request, jsonify, send_file
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    jsonify,
+    send_file,
+    redirect,
+    flash,
+    url_for
+)
+
 from app.models import Formula, FormulaVariable, Calculation
 from app import db
 from app.services import evaluate_formula
+
 import pandas as pd
-from flask import redirect
-from flask import request, jsonify
-from flask import flash, redirect, url_for
 from datetime import datetime
 import json
 import os
 import logging
+
 from flask_login import (
     login_user,
     logout_user,
     login_required,
     current_user
 )
-
 
 main = Blueprint('main', __name__)
 
@@ -34,7 +42,8 @@ def home():
     return render_template(
         'home.html',
         formulas=formulas,
-        calculations=calculations
+        calculations=calculations,
+        current_user=current_user
     )
 
 
@@ -58,8 +67,6 @@ def export_excel():
 
     calculations = Calculation.query.all()
 
-    print("TOTAL CALCULATIONS:", len(calculations))
-
     export_folder = 'exports'
 
     os.makedirs(export_folder, exist_ok=True)
@@ -74,7 +81,6 @@ def export_excel():
     for calc in calculations:
 
         if calc.formula_name not in formula_groups:
-
             formula_groups[calc.formula_name] = []
 
         formula_groups[calc.formula_name].append({
@@ -101,8 +107,6 @@ def export_excel():
                 index=False
             )
 
-    print("EXCEL GENERATED")
-
     return send_file(
         os.path.abspath(file_path),
         as_attachment=True,
@@ -113,6 +117,7 @@ def export_excel():
 # CREATE FORMULA
 @main.route('/create-formula', methods=['GET', 'POST'])
 def create_formula():
+
     if not current_user.is_authenticated:
         return redirect('/login')
 
@@ -128,7 +133,7 @@ def create_formula():
         formula = Formula(
             name=name,
             description=description,
-            expression=expression,
+            expression=expression
         )
 
         db.session.add(formula)
@@ -156,6 +161,11 @@ def create_formula():
             db.session.add(variable)
 
         db.session.commit()
+
+        flash(
+            "Formula Created Successfully",
+            "success"
+        )
 
         return redirect(url_for('main.home'))
 
@@ -220,7 +230,6 @@ def calculate_api():
             }
 
         answer = evaluate_formula(
-
             selected_formula.expression,
             data['values'],
             variable_config
@@ -250,8 +259,6 @@ def calculate_api():
 
         logging.error(str(e))
 
-        print("SAVE ERROR:", e)
-
         return jsonify({
 
             'success': False,
@@ -280,6 +287,7 @@ def view_formula(formula_id):
 # EDIT FORMULA
 @main.route('/edit-formula/<int:formula_id>', methods=['GET', 'POST'])
 def edit_formula(formula_id):
+
     if not current_user.is_authenticated:
         return redirect('/login')
 
@@ -327,6 +335,11 @@ def edit_formula(formula_id):
 
         db.session.commit()
 
+        flash(
+            "Formula Updated Successfully",
+            "success"
+        )
+
         return redirect('/')
 
     return render_template(
@@ -339,6 +352,7 @@ def edit_formula(formula_id):
 # DELETE FORMULA
 @main.route('/delete-formula/<int:formula_id>')
 def delete_formula(formula_id):
+
     if not current_user.is_authenticated:
         return redirect('/login')
 
@@ -355,13 +369,21 @@ def delete_formula(formula_id):
 
     db.session.commit()
 
+    flash(
+        "Formula Deleted Successfully",
+        "success"
+    )
+
     return redirect('/')
+
 
 # LOGIN PAGE
 @main.route('/login', methods=['GET', 'POST'])
 def login():
 
     from app.models import User
+
+    error = None
 
     if request.method == 'POST':
 
@@ -376,11 +398,22 @@ def login():
 
             login_user(user)
 
+            flash(
+                f'Welcome {user.username}',
+                'success'
+            )
+
             return redirect('/')
 
-        return "Invalid Username or Password"
+        else:
 
-    return render_template('login.html')
+            error = "Invalid username or password"
+
+    return render_template(
+        'login.html',
+        error=error
+    )
+
 
 # LOGOUT
 @main.route('/logout')
@@ -388,5 +421,10 @@ def login():
 def logout():
 
     logout_user()
+
+    flash(
+        "Logged Out Successfully",
+        "success"
+    )
 
     return redirect('/')
