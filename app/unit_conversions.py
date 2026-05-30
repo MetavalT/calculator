@@ -1,5 +1,6 @@
-# This file contains the unit conversion factors for various units.
-# Each unit is defined in terms of a base SI unit for its category (e.g., meter for distance, second for time).
+# is file mein humne unit conversions ke liye ek dictionary banaya hai 
+# jisme har unit ko uske base SI unit ke terms mein define kiya gaya hai.
+# harr unit ke liye ek conversion factor diya gaya hai jo us unit ko base unit mein convert karta hai.
 # 😎🙄🤐
 
 UNIT_CONVERSIONS = {
