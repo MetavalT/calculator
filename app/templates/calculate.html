@@ -1,156 +1,341 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ formula.name }} — Metaval Engineering</title>
+{% extends "base.html" %}
+{% block title %}{{ formula.name }}{% endblock %}
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+{% block content %}
 
-<!-- NAVBAR -->
-<nav class="mv-nav">
-    <a href="/" class="mv-nav-brand">
-        <span class="brand-dot"></span>
-        Metaval &nbsp;<span style="font-weight:300;opacity:0.55;">|</span>&nbsp; Engineering Calc
-    </a>
-    <div class="mv-nav-links">
-        <a href="/" class="nav-outline">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Home
-        </a>
-        <a href="/history" class="nav-outline">History</a>
-        <a href="/create-formula" class="nav-primary">+ Create Formula</a>
-    </div>
-</nav>
+<div class="mv-page-header">
 
-<main class="mv-main" style="max-width:680px;">
+```
+<span class="mv-card-tag">
+    Formula Calculator
+</span>
 
-    <!-- BREADCRUMB -->
-    <div style="display:flex;align-items:center;gap:6px;font-size:0.8rem;color:var(--text-muted);margin-bottom:1.5rem;">
-        <a href="/" style="color:var(--text-muted);text-decoration:none;">Home</a>
-        <span>›</span>
-        <span style="color:var(--text-white);">{{ formula.name }}</span>
-    </div>
+<h2 style="margin-top:8px;">
+    {{ formula.name }}
+</h2>
 
-    <!-- HEADER -->
-    <div class="mv-page-header">
-        <span class="mv-card-tag">Formula Calculator</span>
-        <h2 style="margin-top:6px;">{{ formula.name }}</h2>
-        <p>{{ formula.description }}</p>
-    </div>
+<p>
+    {{ formula.description }}
+</p>
+```
 
-    <!-- FORMULA EXPRESSION -->
-    <div class="mv-section-label">Expression</div>
-    <div class="mv-formula-box">{{ formula.expression }}</div>
+</div>
 
-    <!-- CARD -->
-    <div class="mv-card" style="margin-top:1.5rem;">
+<!-- FORMULA -->
 
-        <!-- UNIT SYSTEM -->
-        <div class="mv-form-group">
-            <label class="mv-label">Unit System</label>
-            <select id="unit_system">
-                {% set first_var = variables[0] %}
-                {% set systems = first_var.available_units.split(',') %}
-                {% for system in systems %}
-                <option value="{{ system }}">{{ system.replace('|', ' & ') }}</option>
-                {% endfor %}
-            </select>
-        </div>
+<div class="mv-section-label">
+    Formula Expression
+</div>
 
-        <hr class="mv-divider">
+<div class="mv-formula-box">
+    {{ formula.expression }}
+</div>
 
-        <!-- VARIABLE INPUTS -->
-        {% for var in variables %}
-        <div class="mv-form-group">
-            <label class="mv-label" for="value_{{ var.variable_name }}">{{ var.display_name }}</label>
-            <input
-                type="number"
-                id="value_{{ var.variable_name }}"
-                placeholder="Enter {{ var.display_name }}"
-                step="any"
-            >
-        </div>
+<!-- CARD -->
+
+<div class="mv-card" style="margin-top:1.5rem;">
+
+```
+<!-- UNIT SYSTEM -->
+
+<div class="mv-form-group">
+
+    <label class="mv-label">
+
+        Unit System
+
+    </label>
+
+    <select
+        id="unit_system"
+        class="mv-input"
+        onchange="applyUnitPreset()"
+    >
+
+        {% set first_var = variables[0] %}
+        {% set systems = first_var.available_units.split(',') %}
+
+        {% for system in systems %}
+
+        <option value="{{ system }}">
+
+            {{ system.replace('|', ' & ') }}
+
+        </option>
+
         {% endfor %}
 
-        <!-- CALCULATE BUTTON -->
-        <button class="mv-btn mv-btn-primary" style="width:100%;justify-content:center;padding:12px;" onclick="calculateFormula()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="9" y2="15"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
-            Calculate
-        </button>
+    </select>
 
-        <!-- RESULT BOX -->
-        <div class="mv-result" id="result-box">
-            <div class="mv-result-label">Result</div>
-            <div class="mv-result-value" id="result-value"></div>
-        </div>
+</div>
+
+<hr class="mv-divider">
+
+<!-- VARIABLES -->
+
+{% for var in variables %}
+
+<div class="mv-form-group">
+
+    <label class="mv-label">
+
+        {{ var.display_name }}
+
+    </label>
+
+    <div class="mv-variable-row">
+
+        <!-- VALUE -->
+
+        <input
+            type="number"
+            step="any"
+            id="value_{{ var.variable_name }}"
+            class="mv-input mv-value-input"
+            placeholder="Enter {{ var.display_name }}"
+        >
+
+        <!-- UNIT -->
+
+        <select
+            id="unit_{{ var.variable_name }}"
+            class="mv-unit-select"
+        >
+
+            {% set systems = var.available_units.split(',') %}
+
+            {% for system in systems %}
+
+                {% set unit_parts = system.split('|') %}
+
+                {% for unit in unit_parts %}
+
+                <option value="{{ unit.strip() }}">
+
+                    {{ unit.strip() }}
+
+                </option>
+
+                {% endfor %}
+
+            {% endfor %}
+
+        </select>
 
     </div>
 
-    <div style="margin-top:1rem;">
-        <a href="/formula/{{ formula.id }}" class="mv-btn mv-btn-outline mv-btn-sm">View Formula Details</a>
+</div>
+
+{% endfor %}
+
+<!-- BUTTON -->
+
+<button
+    class="mv-btn mv-btn-primary"
+    style="
+        width:100%;
+        justify-content:center;
+        padding:12px;
+        margin-top:10px;
+    "
+    onclick="calculateFormula()"
+>
+
+    Calculate
+
+</button>
+
+<!-- RESULT -->
+
+<div class="mv-result" id="result-box">
+
+    <div class="mv-result-label">
+
+        Result
+
     </div>
 
-</main>
+    <div
+        class="mv-result-value"
+        id="result-value"
+    ></div>
 
-<footer class="mv-footer">
-    Metaval Engineering Calculator &nbsp;·&nbsp; <a href="https://metaval.com" target="_blank">metaval.com</a>
-</footer>
+</div>
+```
+
+</div>
+
+<!-- STYLES -->
+
+<style>
+
+.mv-variable-row{
+
+    display:flex;
+
+    gap:12px;
+
+    align-items:center;
+}
+
+.mv-value-input{
+
+    flex:2;
+}
+
+.mv-unit-select{
+
+    flex:1;
+
+    background:var(--bg-deep);
+
+    color:var(--text-white);
+
+    border:1px solid var(--border);
+
+    border-radius:8px;
+
+    padding:10px 14px;
+
+    min-width:140px;
+}
+
+</style>
+
+<!-- SCRIPT -->
 
 <script>
-async function calculateFormula() {
-    let values = {}
-    let selectedSystem = document.getElementById('unit_system').value
-    let units = selectedSystem.split('|')
-    let resultBox = document.getElementById('result-box')
-    let resultValue = document.getElementById('result-value')
+
+function applyUnitPreset() {
+
+    let preset = document
+        .getElementById('unit_system')
+        .value
+
+    let units = preset.split('|')
 
     {% for var in variables %}
+
+    document.getElementById(
+        'unit_{{ var.variable_name }}'
+    ).value = units[{{ loop.index0 }}].trim()
+
+    {% endfor %}
+}
+
+window.onload = applyUnitPreset
+
+
+async function calculateFormula() {
+
+    let values = {}
+
+    let resultBox =
+        document.getElementById('result-box')
+
+    let resultValue =
+        document.getElementById('result-value')
+
+    {% for var in variables %}
+
     values["{{ var.variable_name }}"] = {
-        value: document.getElementById("value_{{ var.variable_name }}").value,
-        unit: units[{{ loop.index0 }}]
+
+        value: document.getElementById(
+            "value_{{ var.variable_name }}"
+        ).value,
+
+        unit: document.getElementById(
+            "unit_{{ var.variable_name }}"
+        ).value
     }
+
     {% endfor %}
 
-    // Validation
+    // VALIDATION
+
     for (let key in values) {
+
         if (values[key].value === '') {
-            resultBox.className = 'mv-result show error'
-            resultValue.textContent = 'Please fill in all values before calculating.'
+
+            resultBox.className =
+                'mv-result show error'
+
+            resultValue.textContent =
+                'Please fill all values.'
+
             return
         }
     }
 
     try {
-        const response = await fetch('/api/calculate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ formula_id: {{ formula.id }}, values: values })
-        })
+
+        const response = await fetch(
+            '/api/calculate',
+            {
+
+                method: 'POST',
+
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify({
+
+                    formula_id: {{ formula.id }},
+
+                    values: values
+                })
+            }
+        )
+
         const data = await response.json()
 
-        if (!response.ok || data.success === false) {
-            resultBox.className = 'mv-result show error'
-            resultValue.textContent = 'Error: ' + data.error
+        if (!response.ok ||
+            data.success === false) {
+
+            resultBox.className =
+                'mv-result show error'
+
+            resultValue.textContent =
+                'Error: ' + data.error
+
         } else {
-            resultBox.className = 'mv-result show success'
-            resultValue.textContent = data.answer.value + ' ' + data.answer.unit
+
+            resultBox.className =
+                'mv-result show success'
+
+            resultValue.textContent =
+
+                data.answer.value +
+
+                (
+                    data.answer.unit
+                    ? ' ' + data.answer.unit
+                    : ''
+                )
         }
+
     } catch (err) {
-        resultBox.className = 'mv-result show error'
-        resultValue.textContent = 'Network error. Please try again.'
+
+        resultBox.className =
+            'mv-result show error'
+
+        resultValue.textContent =
+            'Network error.'
     }
 }
 
-// Allow Enter key to calculate
-document.addEventListener('keydown', e => {
-    if (e.key === 'Enter') calculateFormula()
-})
+document.addEventListener(
+    'keydown',
+    e => {
+
+        if (e.key === 'Enter') {
+
+            calculateFormula()
+        }
+    }
+)
+
 </script>
-</body>
-</html>
+
+{% endblock %}
